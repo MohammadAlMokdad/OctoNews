@@ -5,8 +5,7 @@ An automated WhatsApp Channel that posts **technology, cybersecurity and AI news
 | Part | Service | Free limit | This bot uses |
 |---|---|---|---|
 | Scheduler | GitHub Actions (hourly) | 2,000 min/month (private repo) | ~1,100 min/month |
-| AI screening | Gemini 3.5 Flash Lite (free tier) | 15/min, 500/day | ~24–30 requests/day |
-| AI writing | Gemini 3.6 Flash, then 3.8 Flash (free tier) | 5/min, 20/day each | ≤11 requests/day |
+| AI screening + writing | Gemini 3.5 Flash Lite (free tier; 3.1 Flash Lite as backup) | 15/min, 500/day | ~35–40 requests/day |
 | WhatsApp sending | Whapi.Cloud Sandbox | 150 msgs/day, 1,000 requests/month | ≤11 posts/day, ~330/month |
 
 > ⚠️ Meta has **no official API** for WhatsApp Channels. Whapi is an unofficial gateway linked to a WhatsApp account by QR code. **Use a dedicated phone number, never your personal one.**

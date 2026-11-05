@@ -51,9 +51,9 @@ MAX_SUMMARY_CHARS = 450
 
 # Gemini fallback chains, tried in order (busy or out-of-quota models fall through to the next).
 # Free-tier limits seen Nov 2026: 3.6 Flash and 3.8 Flash 5/min, 20/day each; 3.5 Flash Lite 15/min, 500/day.
-# Screening runs hourly (~24-30 calls/day) -> Flash Lite. Writing is <=11 calls/day -> Flash, Lite as backup.
+# Both jobs use 3.5 Flash Lite (owner's choice): ~24-30 screening + <=11 writing calls/day fits its 500/day.
 DEFAULT_SCREEN_MODELS = "gemini-3.5-flash-lite,gemini-3.1-flash-lite"
-DEFAULT_WRITE_MODELS = "gemini-3.6-flash,gemini-3.8-flash,gemini-3.5-flash-lite"
+DEFAULT_WRITE_MODELS = "gemini-3.5-flash-lite,gemini-3.1-flash-lite"
 
 USER_AGENT = "Mozilla/5.0 (compatible; OctoNewsBot/1.0; +https://github.com/)"
 HTTP_TIMEOUT = 20.0
