@@ -130,16 +130,23 @@ def load_feeds(path: Path = SOURCES_FILE) -> list[Feed]:
     return feeds
 
 
+def _env(name: str, default: str = "") -> str:
+    """Read an env var, dropping whitespace and stray byte-order marks (Windows tools can add a BOM
+    when piping a secret, which then breaks HTTP headers)."""
+    value = os.environ.get(name, "").replace("﻿", "").strip()
+    return value or default
+
+
 def load_settings() -> Settings:
     load_dotenv()
-    state_file = os.environ.get("OCTONEWS_STATE_FILE")
+    state_file = _env("OCTONEWS_STATE_FILE")
     return Settings(
         feeds=load_feeds(),
-        gemini_api_key=os.environ.get("GEMINI_API_KEY", ""),
-        gemini_screen_models=os.environ.get("GEMINI_SCREEN_MODELS") or DEFAULT_SCREEN_MODELS,
-        gemini_write_models=os.environ.get("GEMINI_WRITE_MODELS") or DEFAULT_WRITE_MODELS,
-        whapi_token=os.environ.get("WHAPI_TOKEN", ""),
-        whapi_channel_id=os.environ.get("WHAPI_CHANNEL_ID", ""),
+        gemini_api_key=_env("GEMINI_API_KEY"),
+        gemini_screen_models=_env("GEMINI_SCREEN_MODELS", DEFAULT_SCREEN_MODELS),
+        gemini_write_models=_env("GEMINI_WRITE_MODELS", DEFAULT_WRITE_MODELS),
+        whapi_token=_env("WHAPI_TOKEN"),
+        whapi_channel_id=_env("WHAPI_CHANNEL_ID"),
         state_file=Path(state_file) if state_file else DEFAULT_STATE_FILE,
-        paused_until=parse_paused_until(os.environ.get("OCTONEWS_PAUSED_UNTIL")),
+        paused_until=parse_paused_until(_env("OCTONEWS_PAUSED_UNTIL")),
     )

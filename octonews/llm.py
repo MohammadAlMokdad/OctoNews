@@ -13,7 +13,7 @@ from typing import Literal, TypeVar
 
 from google import genai
 from google.genai import errors, types
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from . import config
 from .feeds import Article
@@ -129,9 +129,9 @@ class Editor:
                             time.sleep(RETRY_DELAY_SECONDS)
                             continue
                         raise
-                    except ValueError as exc:  # malformed JSON from the model
+                    except ValidationError as exc:  # malformed JSON from the model
                         last_exc = exc
-                        log.warning("%s: bad output (%s)", model, exc)
+                        log.warning("%s: bad output (%s)", model, str(exc)[:200])
         raise last_exc or RuntimeError("all Gemini models failed")
 
     def screen_batch(self, articles: list[Article], known_titles: list[str] | None = None) -> dict[int, ScreenItem]:
