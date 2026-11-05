@@ -1,0 +1,104 @@
+# News sources for OctoNews.
+#
+# Fields:
+#   name       Display name (also used in logs)
+#   url        RSS/Atom feed URL  -- or --  google_news: a Google News search (built into an RSS URL)
+#   region     global | mena | lebanon   (Lebanon/MENA items get a ranking boost)
+#   lang       en | ar | fr              (language of the source)
+#   weight     Optional ranking bonus/penalty for this source (default 0)
+#   keywords   true = general-news source; only keep items whose title/summary match tech keywords
+#              (saves AI calls on busy general feeds)
+#
+# Run `python -m octonews.main --check-feeds` after editing to confirm every feed works.
+
+feeds:
+  # --- Global cybersecurity ---
+  - name: The Hacker News
+    url: https://feeds.feedburner.com/TheHackersNews
+    region: global
+    lang: en
+  - name: BleepingComputer
+    url: https://www.bleepingcomputer.com/feed/
+    region: global
+    lang: en
+  - name: The Record
+    url: https://therecord.media/feed
+    region: global
+    lang: en
+  - name: Krebs on Security
+    url: https://krebsonsecurity.com/feed/
+    region: global
+    lang: en
+
+  # --- Global tech & AI ---
+  - name: TechCrunch
+    url: https://techcrunch.com/feed/
+    region: global
+    lang: en
+  - name: The Verge
+    url: https://www.theverge.com/rss/index.xml
+    region: global
+    lang: en
+  - name: Ars Technica
+    url: https://feeds.arstechnica.com/arstechnica/index
+    region: global
+    lang: en
+  - name: MIT Technology Review (AI)
+    url: https://www.technologyreview.com/topic/artificial-intelligence/feed
+    region: global
+    lang: en
+
+  # --- MENA tech ---
+  - name: Wamda
+    url: https://www.wamda.com/feed
+    region: mena
+    lang: en
+  - name: Tech-WD
+    url: https://www.tech-wd.com/wd/feed/
+    region: mena
+    lang: ar
+
+  # --- Lebanon ---
+  - name: SMEX
+    url: https://smex.org/feed/
+    region: lebanon
+    lang: en
+  - name: LBCI (EN)
+    url: https://www.lbcgroup.tv/Rss/latest-news/en
+    region: lebanon
+    lang: en
+    keywords: true
+  - name: LBCI (AR)
+    url: https://www.lbcgroup.tv/Rss/latest-news/ar
+    region: lebanon
+    lang: ar
+    keywords: true
+  - name: Annahar
+    url: https://www.annahar.com/rss
+    region: lebanon
+    lang: ar
+    keywords: true
+  - name: Google News - Lebanon tech (EN)
+    google_news:
+      query: 'Lebanon (cybersecurity OR hackers OR hacked OR "artificial intelligence" OR technology OR startup OR internet OR telecom) -Ohio -Tennessee -Pennsylvania -Missouri -Oregon -Indiana -Kentucky -Texas -"New Hampshire" -"Lebanon Valley" when:1d'
+      hl: en-LB
+      gl: LB
+      ceid: LB:en
+    region: lebanon
+    lang: en
+  - name: Google News - Lebanon tech (AR)
+    google_news:
+      query: 'لبنان (اختراق OR سيبراني OR قرصنة OR "ذكاء اصطناعي" OR تكنولوجيا OR الإنترنت OR الاتصالات) when:1d'
+      hl: ar
+      gl: LB
+      ceid: LB:ar
+    region: lebanon
+    lang: ar
+  - name: Google News - Liban tech (FR)
+    google_news:
+      query: 'Liban (cybersécurité OR piratage OR "intelligence artificielle" OR technologie OR numérique) when:1d'
+      hl: fr
+      gl: LB
+      ceid: LB:fr
+    region: lebanon
+    lang: fr

@@ -1,0 +1,85 @@
+name: OctoNews
+
+on:
+  schedule:
+    - cron: "7 * * * *" # hourly at :07 UTC. The bot itself decides posting times in Beirut time.
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: print posts in the log instead of sending (state is not saved)"
+        type: boolean
+        default: true
+      force_slot:
+        description: "Treat a posting slot as due right now"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write # needed to push state.json to the bot-state branch
+
+concurrency:
+  group: octonews
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OCTONEWS_STATE_FILE: ${{ github.workspace }}/data/state.json
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Load state from bot-state branch
+        run: |
+          mkdir -p data
+          if git fetch --depth=1 origin bot-state 2>/dev/null; then
+            git show FETCH_HEAD:state.json > data/state.json || true
+            echo "Loaded state ($(wc -c < data/state.json) bytes)"
+          else
+            echo "No bot-state branch yet; starting with empty state"
+          fi
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run OctoNews
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_SCREEN_MODELS: ${{ vars.GEMINI_SCREEN_MODELS }}
+          GEMINI_WRITE_MODELS: ${{ vars.GEMINI_WRITE_MODELS }}
+          WHAPI_TOKEN: ${{ secrets.WHAPI_TOKEN }}
+          WHAPI_CHANNEL_ID: ${{ secrets.WHAPI_CHANNEL_ID }}
+          OCTONEWS_PAUSED_UNTIL: ${{ vars.OCTONEWS_PAUSED_UNTIL }}
+        run: >
+          python -m octonews.main
+          ${{ inputs.dry_run && '--dry-run' || '' }}
+          ${{ inputs.force_slot && '--force-slot' || '' }}
+
+      # Runs even if the bot step failed, so posts that did go out are never forgotten (no double posting).
+      - name: Save state to bot-state branch
+        if: always() && !inputs.dry_run && hashFiles('data/state.json') != ''
+        run: |
+          git config user.name "octonews-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          STATE_DIR="$RUNNER_TEMP/state"
+          if git fetch --depth=1 origin bot-state 2>/dev/null; then
+            git worktree add --detach "$STATE_DIR" FETCH_HEAD
+            cd "$STATE_DIR" && git checkout -q -B bot-state
+          else
+            git worktree add --detach "$STATE_DIR"
+            cd "$STATE_DIR" && git checkout -q --orphan bot-state && git rm -rfq .
+          fi
+          cp "$GITHUB_WORKSPACE/data/state.json" state.json
+          git add state.json
+          if git diff --cached --quiet; then
+            echo "State unchanged"
+            exit 0
+          fi
+          git commit -qm "state: $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q origin bot-state
