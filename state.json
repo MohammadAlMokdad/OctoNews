@@ -170,23 +170,6 @@
    "title": "Want to Rent an Internet Address at the White House?",
    "url": "https://krebsonsecurity.com/2026/11/want-to-rent-an-internet-address-at-the-white-house/"
   },
-  "2f00664bd9dff117": {
-   "breaking": false,
-   "category": "tech",
-   "english_title": "Alfa launches remote eSIM subscription in Lebanon",
-   "id": "2f00664bd9dff117",
-   "importance": 8,
-   "lang": "fr",
-   "lebanon_relevance": 3,
-   "published": "2026-11-05T08:00:00+00:00",
-   "region": "lebanon",
-   "screened_at": "2026-11-05T09:59:11.442159+00:00",
-   "snippet": "",
-   "source": "Google News - Liban tech (FR)",
-   "source_weight": 0.0,
-   "title": "Alfa ouvre la souscription eSIM à distance - Libnanews",
-   "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1YU1RhVkJhWWVvZnJFSzVqVGNNQmJDR19IdDVGNGlPY3FrQ2Z2RTNNdjdrWFR3ZmNzRzNOdUNUQXNBb2V1dTE4Rm1tTWFYbW1sSExDbi1GdXFCOTR5SWQzRjF0cVREUVlWaXl2TlFSakFlZkE?oc=5"
-  },
   "2f225b24eab47476": {
    "breaking": false,
    "category": "tech",
@@ -237,6 +220,23 @@
    "source_weight": 0.0,
    "title": "Cyberattack disrupts blood storage refrigeration systems in France",
    "url": "https://www.bleepingcomputer.com/news/security/cyberattack-disrupts-blood-storage-refrigeration-systems-in-france/"
+  },
+  "350327fdd7cd3bdb": {
+   "breaking": false,
+   "category": "cybersecurity",
+   "english_title": "Chainalysis warns user data exposed in cyberattack involving agentic techniques",
+   "id": "350327fdd7cd3bdb",
+   "importance": 8,
+   "lang": "en",
+   "lebanon_relevance": 0,
+   "published": "2026-11-05T00:00:00+00:00",
+   "region": "global",
+   "screened_at": "2026-11-05T10:07:53.411974+00:00",
+   "snippet": "Chainalysis, the blockchain analytics company, said Wednesday night that some information belonging to all its users — which its website says include those in the law enforcement and national security sectors — had been exposed in a cyberattack.",
+   "source": "The Record",
+   "source_weight": 0.0,
+   "title": "Chainalysis warns all users hit in cyber breach involving ‘agentic’ techniques",
+   "url": "https://therecord.media/chainalysis-all-users-hit-by-agentic-cyberattack"
   },
   "3594344bad138ade": {
    "breaking": false,
@@ -765,23 +765,6 @@
    "title": "Revolut’s valuation jumps 53% to $115B in new share sale as it prepares to launch US bank",
    "url": "https://techcrunch.com/2026/11/04/revoluts-valuation-jumps-53-to-115b-in-new-share-sale-as-it-prepares-to-launch-us-bank/"
   },
-  "9e34d9e9f36fbba8": {
-   "breaking": false,
-   "category": "cybersecurity",
-   "english_title": "Apple alerts users in 99 countries about mercenary spyware",
-   "id": "9e34d9e9f36fbba8",
-   "importance": 9,
-   "lang": "fr",
-   "lebanon_relevance": 2,
-   "published": "2026-11-05T05:30:01+00:00",
-   "region": "lebanon",
-   "screened_at": "2026-11-05T09:59:11.442159+00:00",
-   "snippet": "",
-   "source": "Google News - Liban tech (FR)",
-   "source_weight": 0.0,
-   "title": "Apple alerte les utilisateurs de 99 pays contre des logiciels espions mercenaires - Génération NT",
-   "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxNQUpYbDVkSnNRYUNIUFFLZzg1YU9QT0tPYU1uOExlaVBseTZPWC1UT1hFRTc4X29Pc0hrM1NnWW9WQVNrd3kzajU2RW0yWS04a2pCTENQVFc5dGdsY25tYS14TjBoUHMzUmEtbktJTHo4NU9MX0ZhWnVtMktjTTZVc0ljX1JIYmpyZFJaUXZFVENsMW5kVnfSAZYBQVVfeXFMTUFKWGw1ZEpzUWFDSFBRS2c4NWFPUE9LT2FNbjhMZWlQbHk2T1gtVE9YRUU3OF9vT3NIazNTZ1lvVkFTa3d5M2o1NkVtMlktOGtqQkxDUFRXOXRnbGNubWEteE4waFBzM1JhLW5LSUx6ODVPTF9GYVp1bTJLY002VXNJY19SSGJqcmRSWlF2RVRDbDFuZFZ3?oc=5"
-  },
   "a1e153edc152696f": {
    "breaking": false,
    "category": "ai",
@@ -1259,7 +1242,44 @@
    "url": "https://www.tech-wd.com/wd/2026/11/04/%d8%b3%d8%a7%d9%85%d8%b3%d9%88%d9%86%d8%ac-%d8%aa%d9%88%d9%81%d8%b1-%d9%84%d8%a3%d9%88%d9%84-%d9%85%d8%b1%d8%a9-%d9%85%d9%8a%d8%b2%d8%a7%d8%aa-%d8%b3%d9%85%d8%b9%d9%8a%d8%a9-%d8%b7%d8%a8%d9%8a%d8%a9/"
   }
  },
- "posted": [],
+ "posted": [
+  {
+   "category": "ai",
+   "english_title": "TeleLiban introduces Talia, Lebanon’s first AI-generated news anchor",
+   "id": "1ebfc936fe2c2a9c",
+   "kind": "slot",
+   "lebanon_relevance": 3,
+   "message_id": "PsorXBolryssPGo-1zcBq53i50D1HQ-Zg",
+   "posted_at": "2026-11-05T10:07:53.411974+00:00",
+   "slot": "2026-11-05@12",
+   "title": "TeleLiban has introduced Talia, Lebanon’s first artificial intelligence-generated news anchor - Informat.ro",
+   "url": "https://informat.ro/en/international/teleliban-launches-talia-lebanons-first-ai-news-anchor-146901"
+  },
+  {
+   "category": "tech",
+   "english_title": "Alfa launches remote eSIM subscription in Lebanon",
+   "id": "2f00664bd9dff117",
+   "kind": "slot",
+   "lebanon_relevance": 3,
+   "message_id": "Psr2y1qhm_9iWuA-1xoBq53i50D1HQ-Zw",
+   "posted_at": "2026-11-05T10:07:53.411974+00:00",
+   "slot": "2026-11-05@12",
+   "title": "Alfa ouvre la souscription eSIM à distance - Libnanews",
+   "url": "https://libnanews.com/alfa-ouvre-la-souscription-esim-a-distance/"
+  },
+  {
+   "category": "cybersecurity",
+   "english_title": "Apple alerts users in 99 countries about mercenary spyware",
+   "id": "9e34d9e9f36fbba8",
+   "kind": "slot",
+   "lebanon_relevance": 2,
+   "message_id": "Pso1V9sgU7Ltn0o-134Bq53i50D1HQ-aA",
+   "posted_at": "2026-11-05T10:07:53.411974+00:00",
+   "slot": "2026-11-05@12",
+   "title": "Apple alerte les utilisateurs de 99 pays contre des logiciels espions mercenaires - Génération NT",
+   "url": "https://www.generation-nt.com/actualites/apple-alerte-99-pays-logiciels-espions-2083972/amp"
+  }
+ ],
  "seen": {
   "00258fba923d4328": "2026-11-05T09:59:11.442159+00:00",
   "00f0af01116b56ac": "2026-11-05T09:59:11.442159+00:00",
@@ -1291,6 +1311,7 @@
   "1c6464246ddaa538": "2026-11-05T09:59:11.442159+00:00",
   "1e12efeac84e0978": "2026-11-05T09:59:11.442159+00:00",
   "1e3c8a38c6a3204a": "2026-11-05T09:59:11.442159+00:00",
+  "1ebfc936fe2c2a9c": "2026-11-05T10:07:53.411974+00:00",
   "203c19be97b9237e": "2026-11-05T09:59:11.442159+00:00",
   "20c9c9965d29956a": "2026-11-05T09:59:11.442159+00:00",
   "20df44331e2f5c25": "2026-11-05T09:59:11.442159+00:00",
@@ -1319,6 +1340,7 @@
   "32c90d2f095832b7": "2026-11-05T09:59:11.442159+00:00",
   "33dad4e8979b2439": "2026-11-05T09:59:11.442159+00:00",
   "349817163ae57bfb": "2026-11-05T09:59:11.442159+00:00",
+  "350327fdd7cd3bdb": "2026-11-05T10:07:53.411974+00:00",
   "3594344bad138ade": "2026-11-05T09:59:11.442159+00:00",
   "3632eace057e58a0": "2026-11-05T09:59:11.442159+00:00",
   "36d509a3e525d356": "2026-11-05T09:59:11.442159+00:00",
@@ -1384,6 +1406,7 @@
   "6d28ddca55e1b16f": "2026-11-05T09:59:11.442159+00:00",
   "6dde07372bdc9492": "2026-11-05T09:59:11.442159+00:00",
   "71b12d48491a67a5": "2026-11-05T09:59:11.442159+00:00",
+  "71c950b0158b87ba": "2026-11-05T10:07:53.411974+00:00",
   "7248a05c4c03475b": "2026-11-05T09:59:11.442159+00:00",
   "73238d2b4e0b83ae": "2026-11-05T09:59:11.442159+00:00",
   "77f64f32faf59d10": "2026-11-05T09:59:11.442159+00:00",
