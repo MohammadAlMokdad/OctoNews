@@ -88,8 +88,10 @@ def test_non_retryable_error_is_raised(monkeypatch):
         ed.screen_batch(ART)
 
 
-def test_all_models_down_raises_after_two_rounds(monkeypatch):
+def test_all_models_down_raises_after_all_rounds(monkeypatch):
     ed = editor(monkeypatch, {"busy": 503, "good": 503, "spare": 429})
     with pytest.raises(errors.APIError):
         ed.screen_batch(ART)
-    assert ed.client.models.calls == ["busy", "busy", "good", "good", "spare", "busy", "busy", "good", "good"]
+    calls = ed.client.models.calls
+    assert calls.count("spare") == 1  # 429: skipped after the first try
+    assert calls.count("busy") == calls.count("good") == 2 * llm.CHAIN_ROUNDS

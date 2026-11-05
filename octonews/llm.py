@@ -29,9 +29,9 @@ MIN_SECONDS_BETWEEN_CALLS = 13.0
 TRANSIENT_CODES = {500, 502, 503, 504}  # "high demand" etc.: retry
 SKIP_FOR_RUN_CODES = {404, 429}  # retired model / out of quota: use the next model for the rest of the run
 ATTEMPTS_PER_MODEL = 2
-CHAIN_ROUNDS = 2
+CHAIN_ROUNDS = 4  # free-tier 503s often last a few minutes; Actions time is free on a public repo
 RETRY_DELAY_SECONDS = 5
-ROUND_DELAY_SECONDS = 20
+ROUND_DELAY_SECONDS = 30
 
 
 class ScreenItem(BaseModel):

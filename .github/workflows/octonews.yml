@@ -24,7 +24,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       OCTONEWS_STATE_FILE: ${{ github.workspace }}/data/state.json
     steps:
