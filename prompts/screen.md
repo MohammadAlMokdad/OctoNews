@@ -15,7 +15,7 @@ Fields:
   - `other`: anything not mainly about technology, even if it mentions a gadget: politics, war and military strikes (including drone strikes), sports, entertainment, celebrity, shopping deals and coupons, gift guides, product reviews, video game releases, weather.
 - `importance` (1-10): how much a tech-curious reader in Lebanon would want to know this today.
   - 9-10: major event with wide impact: a big breach, an actively exploited critical vulnerability in widely used software, a major AI model release, a national-level Lebanese tech or cyber event.
-  - 7-8: notable news most followers would find useful.
+  - 7-8: notable news most followers would find useful. This includes significant news from major tech and AI companies (Apple, Google, Microsoft, Meta, Amazon, Samsung, OpenAI, Anthropic, Nvidia, xAI and similar): product launches, major updates, new models, big deals or legal rulings.
   - 5-6: interesting but niche.
   - 1-4: minor, promotional, opinion pieces, listicles, rumors, deals, how-to guides, podcasts, event announcements.
 - `lebanon_relevance`:

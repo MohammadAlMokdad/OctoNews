@@ -86,7 +86,7 @@ def test_full_run_posts_breaking_then_slot_and_is_idempotent(settings):
     code = main.run(settings, now=NOW, editor_factory=lambda: editor, sender=sender, fetch=fetch)
     assert code == 0
     assert editor.screened == 5  # the 48h-old item is never sent to the AI
-    assert len(sender.sent) == 3  # 1 breaking (Lebanon) + 2 slot posts
+    assert len(sender.sent) == 2  # 1 breaking (Lebanon) + the 08:00 slot's single story
     assert sender.sent[0].startswith("🚨")
     assert "🇱🇧" in sender.sent[0]
     assert not any("Celebrity" in m or "Covered" in m for m in sender.sent)
@@ -110,7 +110,7 @@ def test_send_failure_keeps_slot_open_for_retry(settings):
     assert code == 1
     sender = FakeSender()
     main.run(settings, now=NOW + timedelta(hours=1), editor_factory=lambda: editor, sender=sender, fetch=fetch)
-    assert len(sender.sent) == 3  # retried successfully an hour later
+    assert len(sender.sent) == 2  # retried successfully an hour later (breaking + slot)
 
 
 def test_ai_outage_mid_slot_is_not_a_failure_and_slot_resumes_without_overfilling(settings):
@@ -120,25 +120,23 @@ def test_ai_outage_mid_slot_is_not_a_failure_and_slot_resumes_without_overfillin
     def fetch_more(feeds, now):
         return [a for a in ARTICLES if "Lebanese" not in a.title] + extra, {}  # no breaking item
 
-    class FlakyEditor(FakeEditor):
+    class DownEditor(FakeEditor):
         def write_post(self, a, text):
-            if self.written >= 1:
-                raise RuntimeError("503 high demand")
-            return super().write_post(a, text)
+            raise RuntimeError("503 high demand")
 
-    editor, sender = FlakyEditor(), FakeSender()
-    code = main.run(settings, now=NOW, editor_factory=lambda: editor, sender=sender, fetch=fetch_more)
+    sender = FakeSender()
+    code = main.run(settings, now=NOW, editor_factory=DownEditor, sender=sender, fetch=fetch_more)
     assert code == 0  # AI outage: warning only, no failure email
-    assert len(sender.sent) == 1
+    assert sender.sent == []
 
     sender2 = FakeSender()
-    later = NOW + timedelta(hours=1)
+    later = NOW + timedelta(minutes=30)  # 08:37: the 08:00 slot is still open and gets its story
     main.run(settings, now=later, editor_factory=FakeEditor, sender=sender2, fetch=fetch_more)
-    assert len(sender2.sent) == 2  # completes the 08:00 slot: 1 + 2 = MAX_POSTS_PER_SLOT
+    assert len(sender2.sent) == 1
 
-    sender3 = FakeSender()
-    main.run(settings, now=later + timedelta(hours=1), editor_factory=FakeEditor, sender=sender3, fetch=fetch_more)
-    assert sender3.sent == []  # slot now done
+    sender3 = FakeSender()  # 09:07: slot 08 is done and slot 10 not due yet -> nothing (no overfill)
+    main.run(settings, now=NOW + timedelta(hours=1), editor_factory=FakeEditor, sender=sender3, fetch=fetch_more)
+    assert sender3.sent == []
 
 
 def test_paused_until_blocks_posting_then_resumes_missed_slot(settings):
@@ -151,7 +149,7 @@ def test_paused_until_blocks_posting_then_resumes_missed_slot(settings):
 
     sender2 = FakeSender()
     main.run(paused, now=NOW + timedelta(hours=2, minutes=1), editor_factory=FakeEditor, sender=sender2, fetch=fetch)
-    assert len(sender2.sent) == 3  # 10:08 Beirut: pause over, the 08:00 slot (+ breaking) goes out
+    assert len(sender2.sent) == 1  # 10:08 Beirut: pause over, the 10:00 slot's story goes out
 
 
 def test_force_slot_overrides_pause(settings):
@@ -172,7 +170,7 @@ def test_ai_duplicate_check_drops_repeats_before_posting(settings):
     main.run(settings, now=NOW, editor_factory=lambda: editor, sender=sender, fetch=fetch_with_repeat)
     assert editor.dedupe_calls == 1
     assert not any("Repeat" in m for m in sender.sent)
-    assert len(sender.sent) == 2  # ransomware + AI model; the repeat was dropped, not posted
+    assert len(sender.sent) == 1  # the slot's story; the repeat was dropped, not posted
     state = main.State.load(settings.state_file)
     assert "a20" not in state.candidates  # removed from the queue for good
 
@@ -184,7 +182,7 @@ def test_duplicate_check_failure_falls_back_to_title_matching(settings):
 
     sender = FakeSender()
     code = main.run(settings, now=NOW, editor_factory=Broken, sender=sender, fetch=fetch)
-    assert code == 0 and len(sender.sent) == 3
+    assert code == 0 and len(sender.sent) == 2  # breaking + slot story still go out
 
 
 def test_no_posts_during_quiet_hours(settings):

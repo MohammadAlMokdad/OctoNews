@@ -51,8 +51,9 @@ def test_due_slot_basic_and_quiet_hours():
     s = State()
     assert rank.due_slot(local(7), s) is None  # before first slot
     assert rank.due_slot(local(8), s) == 8
-    assert rank.due_slot(local(12), s) == 8  # cron ran late, slot still due
-    assert rank.due_slot(local(13), s) == 13  # missed 08:00 is skipped, not double-posted
+    assert rank.due_slot(local(9), s) == 8  # run came late, slot still due
+    assert rank.due_slot(local(11), s) == 10  # a missed slot is skipped, not double-posted
+    assert rank.due_slot(local(22), s) == 22
     assert rank.due_slot(local(23), s) is None  # quiet hours
     assert rank.due_slot(local(3), s) is None
 
@@ -61,7 +62,7 @@ def test_due_slot_not_repeated_once_done():
     s = State()
     s.mark_slot_done(local(8).date(), 8)
     assert rank.due_slot(local(9), s) is None
-    assert rank.due_slot(local(13), s) == 13
+    assert rank.due_slot(local(10), s) == 10
 
 
 def test_select_for_slot_respects_limits_threshold_and_dedupe(now):
@@ -90,11 +91,12 @@ def test_select_for_slot_daily_cap(now):
     assert rank.select_for_slot([make_candidate(1, importance=9)], s, now, 13) == []
 
 
-def test_last_slot_guarantees_a_lebanon_story(now):
-    evening = now.replace(hour=17)  # 19:07 Beirut
+def test_evening_slot_guarantees_a_lebanon_story(now):
+    evening = now.replace(hour=16)  # 18:07 Beirut
     cands = [make_candidate(i, importance=9) for i in range(3)]
     leb = make_candidate(50, importance=5, lebanon=3, hours_old=2)
-    picks = rank.select_for_slot(cands + [leb], State(), evening, 19)
+    picks = rank.select_for_slot(cands + [leb], State(), evening, config.LEBANON_GUARANTEE_FROM_HOUR)
+    assert rank.select_for_slot(cands + [leb], State(), now, 8)[0] is not leb  # morning: best story wins
     assert leb in picks
     assert len(picks) == config.MAX_POSTS_PER_SLOT
 

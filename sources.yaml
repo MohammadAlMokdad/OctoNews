@@ -48,6 +48,16 @@ feeds:
     region: global
     lang: en
 
+  # --- Big tech & AI companies ---
+  - name: Google News - Big tech & AI companies
+    google_news:
+      query: '(Apple OR OpenAI OR Anthropic OR Nvidia OR Google OR Microsoft OR Meta OR Samsung OR xAI) (launches OR announces OR unveils OR releases OR introduces) when:1d'
+      hl: en-US
+      gl: US
+      ceid: US:en
+    region: global
+    lang: en
+
   # --- MENA tech ---
   - name: Wamda
     url: https://www.wamda.com/feed

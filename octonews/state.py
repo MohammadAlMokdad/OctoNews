@@ -85,8 +85,9 @@ class State:
         return n
 
     def posted_lebanon_on(self, local_day: date) -> bool:
+        """True if a story about (or directly involving) Lebanon was posted that day."""
         return any(
-            p.get("lebanon_relevance", 0) >= 1
+            p.get("lebanon_relevance", 0) >= 2
             and datetime.fromisoformat(p["posted_at"]).astimezone(config.TZ).date() == local_day
             for p in self.posted
         )

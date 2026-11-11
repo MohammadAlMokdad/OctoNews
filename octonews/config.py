@@ -18,10 +18,11 @@ DEFAULT_STATE_FILE = ROOT / "data" / "state.json"
 
 TZ = ZoneInfo("Asia/Beirut")
 
-# Posting schedule (Beirut local hours).
-SLOT_HOURS = (8, 13, 19)
-MAX_POSTS_PER_SLOT = 3
-MAX_SLOT_POSTS_PER_DAY = 9
+# Posting schedule (Beirut local hours): one story every 2 hours, 08:00-22:00.
+SLOT_HOURS = (8, 10, 12, 14, 16, 18, 20, 22)
+MAX_POSTS_PER_SLOT = 1
+MAX_SLOT_POSTS_PER_DAY = len(SLOT_HOURS)
+LEBANON_GUARANTEE_FROM_HOUR = 18  # from this slot on, post a Lebanon story if none went out today
 MAX_BREAKING_PER_DAY = 2
 QUIET_START_HOUR = 23  # no posting from 23:00 ...
 QUIET_END_HOUR = 7  # ... until 07:00
@@ -38,7 +39,9 @@ DEDUPE_SIMILARITY = 85  # rapidfuzz token_sort_ratio threshold (0-100)
 MIN_IMPORTANCE_TO_KEEP = 5
 MIN_SCORE_TO_POST = 6.0
 BREAKING_MIN_IMPORTANCE = 8
-LEBANON_BOOST = {0: 0.0, 1: 1.5, 2: 2.0, 3: 3.0}  # by lebanon_relevance level
+# Small boost only: global big-tech news competes on importance; the daily Lebanon story is
+# guaranteed separately (LEBANON_GUARANTEE_FROM_HOUR).
+LEBANON_BOOST = {0: 0.0, 1: 0.5, 2: 1.0, 3: 1.5}  # by lebanon_relevance level
 
 # AI call sizing (Gemini free tier is rate limited per minute and per day).
 SCREEN_BATCH_SIZE = 40

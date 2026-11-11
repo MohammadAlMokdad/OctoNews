@@ -121,10 +121,11 @@ def select_for_slot(
         picks.append(c)
         taken += [c.english_title, c.title]
 
-    # Guarantee: at least one Lebanon/MENA story per day when one exists (checked at the last slot).
-    is_last_slot = slot_hour == config.SLOT_HOURS[-1]
-    if is_last_slot and not state.posted_lebanon_on(local_day) and not any(p.lebanon_relevance >= 1 for p in picks):
-        local = [c for c in ranked if c.lebanon_relevance >= 1 and c not in picks]
+    # Guarantee: at least one Lebanon story per day when one exists. From LEBANON_GUARANTEE_FROM_HOUR
+    # on, if none has gone out today, the slot's pick is replaced by the best Lebanon story.
+    guarantee_due = slot_hour >= config.LEBANON_GUARANTEE_FROM_HOUR
+    if guarantee_due and not state.posted_lebanon_on(local_day) and not any(p.is_lebanon for p in picks):
+        local = [c for c in ranked if c.is_lebanon and c not in picks]
         for c in local:
             if not is_duplicate(c.english_title or c.title, _recent_titles(state, now)):
                 if len(picks) >= limit:
