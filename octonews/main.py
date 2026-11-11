@@ -1,13 +1,13 @@
 """One OctoNews run: fetch -> screen -> (maybe) write & post -> save state.
 
 Usage:
-  python -m octonews.main                 # normal run (what the hourly GitHub Action does)
+  python -m octonews.main                 # normal run (what the scheduler runs every hour)
   python -m octonews.main --dry-run       # print posts instead of sending; state is not saved
   python -m octonews.main --dry-run --force-slot   # pretend a posting slot is due right now
   python -m octonews.main --check-feeds   # test every feed in sources.yaml
   python -m octonews.main --list-models   # Gemini models available to your key
-  python -m octonews.main --list-channels # your WhatsApp channels and their ids (uses 1 Whapi request)
-  python -m octonews.main --send-test     # post a short test message to WHAPI_CHANNEL_ID
+  python -m octonews.main --list-channels # your WhatsApp channels and their ids
+  python -m octonews.main --send-test     # post a short test message to WHATSAPP_CHANNEL_ID
 """
 
 from __future__ import annotations
@@ -105,7 +105,7 @@ def _write_and_post(
         print("=" * 60)
         message_id = "dry-run"
     else:
-        message_id = sender.send_text(settings.whapi_channel_id, message)
+        message_id = sender.send_text(settings.channel_id, message)
         log.info("Posted (%s): %s", kind, c.english_title or c.title)
 
     state.record_post(
@@ -187,11 +187,11 @@ def run(
 
         if plan:
             if not dry_run and sender is None:
-                from .whatsapp import WhatsApp
+                from .whatsapp import make_sender
 
-                if not settings.whapi_channel_id:
-                    raise RuntimeError("WHAPI_CHANNEL_ID is not set")
-                sender = WhatsApp(settings.whapi_token)
+                if not settings.channel_id:
+                    raise RuntimeError("WHATSAPP_CHANNEL_ID is not set")
+                sender = make_sender(settings)
             for n, (c, kind) in enumerate(plan):
                 if n and not dry_run:
                     time.sleep(SECONDS_BETWEEN_POSTS)
@@ -262,14 +262,14 @@ def main(argv: list[str] | None = None) -> int:
         print("\n".join(list_models(settings.gemini_api_key)))
         return 0
     if args.list_channels or args.send_test:
-        from .whatsapp import WhatsApp
+        from .whatsapp import make_sender
 
-        wa = WhatsApp(settings.whapi_token)
+        wa = make_sender(settings)
         if args.list_channels:
             for ch in wa.list_channels():
                 print(f"{ch.get('id')}  {ch.get('name', '')}  role={ch.get('role', '?')}")
         else:
-            mid = wa.send_text(settings.whapi_channel_id, "✅ OctoNews test message / رسالة تجريبية")
+            mid = wa.send_text(settings.channel_id, "✅ OctoNews test message / رسالة تجريبية")
             print(f"Sent test message, id={mid}")
         return 0
 

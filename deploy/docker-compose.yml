@@ -1,0 +1,23 @@
+# WAHA (WhatsApp HTTP API) for OctoNews, running on the same server as the bot.
+# Reachable only from the server itself (127.0.0.1); nothing is exposed to the internet.
+services:
+  waha:
+    image: ${WAHA_IMAGE:-devlikeapro/waha:gows}
+    container_name: waha
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      WAHA_API_KEY: ${WAHA_API_KEY:?WAHA_API_KEY must be set in .env}
+      WHATSAPP_DEFAULT_ENGINE: GOWS        # lightweight engine, no browser (~250 MB RAM)
+      WHATSAPP_RESTART_ALL_SESSIONS: "True" # reconnect the WhatsApp session after a reboot
+      WAHA_PRINT_QR: "False"
+      WAHA_LOG_LEVEL: warn
+      TZ: Asia/Beirut
+    volumes:
+      - /opt/octonews/waha/sessions:/app/.sessions   # the linked WhatsApp login lives here
+      - /opt/octonews/waha/media:/app/.media
+    mem_limit: 600m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }

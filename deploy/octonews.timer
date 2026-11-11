@@ -1,0 +1,10 @@
+[Unit]
+Description=Run OctoNews every 30 minutes (posting slots are decided by the bot in Beirut time)
+
+[Timer]
+OnCalendar=*:00,30
+Persistent=true
+RandomizedDelaySec=20
+
+[Install]
+WantedBy=timers.target

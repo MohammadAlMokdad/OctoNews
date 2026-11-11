@@ -75,8 +75,12 @@ class Settings:
     gemini_api_key: str = ""
     gemini_screen_models: str = DEFAULT_SCREEN_MODELS
     gemini_write_models: str = DEFAULT_WRITE_MODELS
+    channel_id: str = ""  # target WhatsApp Channel, "...@newsletter"
+    whatsapp_provider: str = "waha"  # waha | whapi
+    waha_url: str = "http://localhost:3000"
+    waha_api_key: str = ""
+    waha_session: str = "default"
     whapi_token: str = ""
-    whapi_channel_id: str = ""
     state_file: Path = DEFAULT_STATE_FILE
     paused_until: datetime | None = None  # no automatic posting before this time (screening continues)
 
@@ -145,8 +149,12 @@ def load_settings() -> Settings:
         gemini_api_key=_env("GEMINI_API_KEY"),
         gemini_screen_models=_env("GEMINI_SCREEN_MODELS", DEFAULT_SCREEN_MODELS),
         gemini_write_models=_env("GEMINI_WRITE_MODELS", DEFAULT_WRITE_MODELS),
+        channel_id=_env("WHATSAPP_CHANNEL_ID") or _env("WHAPI_CHANNEL_ID"),
+        whatsapp_provider=_env("WHATSAPP_PROVIDER", "waha").lower(),
+        waha_url=_env("WAHA_URL", "http://localhost:3000"),
+        waha_api_key=_env("WAHA_API_KEY"),
+        waha_session=_env("WAHA_SESSION", "default"),
         whapi_token=_env("WHAPI_TOKEN"),
-        whapi_channel_id=_env("WHAPI_CHANNEL_ID"),
         state_file=Path(state_file) if state_file else DEFAULT_STATE_FILE,
         paused_until=parse_paused_until(_env("OCTONEWS_PAUSED_UNTIL")),
     )

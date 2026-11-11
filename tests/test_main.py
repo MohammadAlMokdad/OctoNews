@@ -61,7 +61,7 @@ class FakeSender:
 
 @pytest.fixture
 def settings(tmp_path):
-    return Settings(feeds=[], whapi_channel_id="123@newsletter", state_file=tmp_path / "state.json")
+    return Settings(feeds=[], channel_id="123@newsletter", state_file=tmp_path / "state.json")
 
 
 @pytest.fixture(autouse=True)

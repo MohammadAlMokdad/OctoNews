@@ -1,0 +1,12 @@
+[Unit]
+Description=OctoNews run (fetch news, screen, post to WhatsApp)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/opt/octonews
+ExecStart=/opt/octonews/.venv/bin/python -m octonews.main
+TimeoutStartSec=1800
+Nice=5
