@@ -83,6 +83,20 @@ def _recent_titles(state: State, now: datetime) -> list[str]:
     return titles
 
 
+def shortlist(candidates: list[Candidate], now: datetime, size: int = 15, lebanon_extra: int = 3) -> list[Candidate]:
+    """Best candidates (by score) for the AI duplicate check, plus a few Lebanon/MENA stories so the
+    evening Lebanon guarantee still has options after the check."""
+    ranked = sorted(candidates, key=lambda c: score(c, now), reverse=True)
+    picked = ranked[:size]
+    picked += [c for c in ranked[size:] if c.lebanon_relevance >= 1][:lebanon_extra]
+    return picked
+
+
+def recent_post_titles(state: State, now: datetime) -> list[str]:
+    since = now - timedelta(hours=config.DEDUPE_WINDOW_HOURS)
+    return [p.get("english_title") or p.get("title", "") for p in state.posted_since(since)]
+
+
 def select_for_slot(
     candidates: list[Candidate], state: State, now: datetime, slot_hour: int
 ) -> list[Candidate]:

@@ -74,6 +74,23 @@ def _screen_new_articles(articles, state: State, editor_factory, now: datetime) 
     return kept
 
 
+def _drop_repeats(candidates: list[Candidate], state: State, now: datetime, editor_factory) -> list[Candidate]:
+    pool = rank.shortlist(candidates, now)
+    if not pool:
+        return candidates
+    try:
+        keep = editor_factory().filter_duplicates(pool, rank.recent_post_titles(state, now))
+    except Exception as exc:  # the title-similarity check in rank.py still applies
+        log.warning("AI duplicate check unavailable this run: %s", exc)
+        return candidates
+    dropped = [c for c in pool if c.id not in keep]
+    for c in dropped:
+        log.info("Dropped repeat story: %s", c.english_title or c.title)
+        state.remove_candidate(c.id)
+    dropped_ids = {c.id for c in dropped}
+    return [c for c in candidates if c.id not in dropped_ids]
+
+
 class AIUnavailable(RuntimeError):
     """Gemini couldn't write a post (busy / out of quota). Not an alert-worthy failure: retried next run."""
 
@@ -98,7 +115,8 @@ def _write_and_post(
         state.remove_candidate(c.id)
         return False
 
-    message = formatter.build_message(c, content, url, breaking=(kind == "breaking"))
+    link = extract.shorten_url(url, headline=c.title)  # drop Arabic slugs when the short link still works
+    message = formatter.build_message(c, content, link, breaking=(kind == "breaking"))
     if dry_run:
         print("\n" + "=" * 60 + f"\n[{kind}] score={rank.score(c, now):.1f} source={c.source}\n" + "-" * 60)
         print(message)
@@ -168,14 +186,19 @@ def run(
             log.info("Posting paused until %s Beirut (screening only)",
                      settings.paused_until.astimezone(config.TZ).strftime("%Y-%m-%d %H:%M"))
 
-        breaking = None if paused else rank.select_breaking(candidates, state, now)
-        if breaking:
-            plan.append((breaking, "breaking"))
-
         if force_slot:
             slot = local_now.hour
         else:
             slot = None if paused else rank.due_slot(local_now, state)
+
+        # Before posting anything, let the AI drop stories that repeat a recent post or each other
+        # (same event, different outlet or wording), which title matching alone misses.
+        if slot is not None or (not paused and rank.select_breaking(candidates, state, now)):
+            candidates = _drop_repeats(candidates, state, now, get_editor)
+
+        breaking = None if paused else rank.select_breaking(candidates, state, now)
+        if breaking:
+            plan.append((breaking, "breaking"))
         incomplete = False
         state_slot_key = slot_key_for(local_now.date(), slot) if slot is not None else ""
         if slot is not None:

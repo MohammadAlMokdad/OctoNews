@@ -31,6 +31,13 @@ def test_duplicate_detection():
     assert not rank.is_duplicate("Apple", ["Apple releases iOS update fixing exploited flaw"])
 
 
+def test_shortlist_keeps_best_plus_some_lebanon(now):
+    cands = [make_candidate(i, importance=9) for i in range(6)]
+    leb = make_candidate(50, importance=5, lebanon=3)
+    picked = rank.shortlist(cands + [leb], now, size=4, lebanon_extra=2)
+    assert len(picked) == 5 and picked[-1] is leb
+
+
 def test_known_titles_includes_posted_and_queued(now):
     s = State()
     c = make_candidate(1)

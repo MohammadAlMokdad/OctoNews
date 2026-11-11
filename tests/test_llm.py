@@ -1,5 +1,6 @@
 """Model fallback logic, with the Gemini client replaced by a fake (no network)."""
 
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -80,6 +81,22 @@ def test_second_round_over_the_chain(monkeypatch):
     ed.client = SimpleNamespace(models=Flaky({}))
     ed.screen_batch(ART)
     assert ed.client.models.calls == ["busy", "busy", "good", "good", "spare", "spare", "busy"]
+
+
+def test_filter_duplicates_maps_indexes_to_ids_on_screen_chain(monkeypatch):
+    ed = editor(monkeypatch, {})
+    seen = {}
+
+    def fake_generate(models, system, user, schema):
+        seen["models"], seen["payload"] = models, json.loads(user)
+        return llm.DedupeResult(keep=[0, 2, 7])  # 7 is out of range and ignored
+
+    monkeypatch.setattr(ed, "_generate", fake_generate)
+    pool = [SimpleNamespace(id=f"c{i}", english_title=f"E{i}", title=f"T{i}") for i in range(3)]
+    assert ed.filter_duplicates(pool, ["Old post"]) == {"c0", "c2"}
+    assert seen["models"] == ["busy", "good", "spare"]
+    assert seen["payload"]["recent_posts"] == ["Old post"]
+    assert [c["idx"] for c in seen["payload"]["candidates"]] == [0, 1, 2]
 
 
 def test_non_retryable_error_is_raised(monkeypatch):

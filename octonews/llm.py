@@ -49,6 +49,10 @@ class ScreenResult(BaseModel):
     items: list[ScreenItem]
 
 
+class DedupeResult(BaseModel):
+    keep: list[int]
+
+
 class WriteResult(BaseModel):
     skip: bool
     skip_reason: str
@@ -163,6 +167,20 @@ class Editor:
                 item.lebanon_relevance = max(0, min(3, item.lebanon_relevance))
                 out[item.idx] = item
         return out
+
+    def filter_duplicates(self, candidates: list, recent_titles: list[str]) -> set[str]:
+        """Given the shortlist (best first) and recently posted headlines, return the ids of the
+        candidates that are NOT repeats of a recent post or of a better-ranked candidate."""
+        payload = {
+            "recent_posts": recent_titles,
+            "candidates": [
+                {"idx": i, "english_title": c.english_title, "title": c.title} for i, c in enumerate(candidates)
+            ],
+        }
+        result = self._generate(
+            self.screen_models, _prompt("dedupe"), json.dumps(payload, ensure_ascii=False), DedupeResult
+        )
+        return {candidates[i].id for i in result.keep if 0 <= i < len(candidates)}
 
     def write_post(self, article: Article, article_text: str) -> tuple[PostContent | None, str]:
         """Returns (content, '') or (None, reason) when the model decides to skip."""

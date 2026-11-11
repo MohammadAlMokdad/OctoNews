@@ -43,6 +43,11 @@ class FakeEditor:
                                 already_covered="Covered" in a.title)
         return out
 
+    def filter_duplicates(self, pool, recent_titles):
+        self.dedupe_calls = getattr(self, "dedupe_calls", 0) + 1
+        self.recent_titles = recent_titles
+        return {c.id for c in pool if "Repeat" not in c.title}
+
     def write_post(self, a, text):
         self.written += 1
         return PostContent("عنوان عربي", "ملخص عربي قصير.", a.title, "Short English summary.", ["Test"]), ""
@@ -68,6 +73,7 @@ def settings(tmp_path):
 def no_network(monkeypatch):
     monkeypatch.setattr(extract, "resolve_url", lambda u: u)
     monkeypatch.setattr(extract, "fetch_article_text", lambda u: "article text")
+    monkeypatch.setattr(extract, "shorten_url", lambda u, headline="": u)
     monkeypatch.setattr(main.time, "sleep", lambda s: None)
 
 
@@ -155,6 +161,30 @@ def test_force_slot_overrides_pause(settings):
     main.run(replace(settings, paused_until=NOW + timedelta(days=1)), force_slot=True, now=NOW,
              editor_factory=FakeEditor, sender=sender, fetch=fetch)
     assert len(sender.sent) >= 1
+
+
+def test_ai_duplicate_check_drops_repeats_before_posting(settings):
+    def fetch_with_repeat(feeds, now):
+        return [a for a in ARTICLES if "Lebanese" not in a.title] + [
+            article(20, "Repeat: hospitals hit by ransomware gang, says report")], {}
+
+    editor, sender = FakeEditor(), FakeSender()
+    main.run(settings, now=NOW, editor_factory=lambda: editor, sender=sender, fetch=fetch_with_repeat)
+    assert editor.dedupe_calls == 1
+    assert not any("Repeat" in m for m in sender.sent)
+    assert len(sender.sent) == 2  # ransomware + AI model; the repeat was dropped, not posted
+    state = main.State.load(settings.state_file)
+    assert "a20" not in state.candidates  # removed from the queue for good
+
+
+def test_duplicate_check_failure_falls_back_to_title_matching(settings):
+    class Broken(FakeEditor):
+        def filter_duplicates(self, pool, recent_titles):
+            raise RuntimeError("503 high demand")
+
+    sender = FakeSender()
+    code = main.run(settings, now=NOW, editor_factory=Broken, sender=sender, fetch=fetch)
+    assert code == 0 and len(sender.sent) == 3
 
 
 def test_no_posts_during_quiet_hours(settings):
