@@ -18,7 +18,7 @@ Every hour, the GitHub Action runs once:
 2. **Screen.** Sends new items to Gemini in batches. Gemini classifies each item (cybersecurity / AI / tech / off-topic), rates its importance (1–10) and its Lebanon relevance (0–3), and flags breaking news and duplicates. Duplicates include the same story already posted by another outlet.
 3. **Queue.** Keeps worthwhile items for up to 24 hours. Lebanon stories get a ranking boost.
 4. **Post.**
-   - **Slots:** **one story every 2 hours, 08:00–22:00 Beirut time** (8 a day): the best story available, whether it's global big-tech news (Apple, OpenAI, Anthropic, Nvidia…) or Lebanese. If no Lebanon story has gone out by 18:00, the next slot posts one.
+   - **Slots:** **one story every 2 hours from 08:00 to midnight (00:00) Beirut time** (9 a day; nothing between 00:20 and 08:00): the best story available, whether it's global big-tech news (Apple, OpenAI, Anthropic, Nvidia…) or Lebanese. If no Lebanon story has gone out by 18:00, the next slot posts one.
    - **Breaking:** an urgent, fresh, important Lebanon story posts right away, up to 2 a day and never between 23:00 and 07:00.
    - For each story, Gemini writes the Arabic and English text from the full article. The code adds the emoji, link and hashtags, so links can't be made up.
 5. **Remember.** Saves `state.json` (seen items, queue, post log) to a separate `bot-state` branch.

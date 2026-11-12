@@ -49,12 +49,14 @@ def test_known_titles_includes_posted_and_queued(now):
 
 def test_due_slot_basic_and_quiet_hours():
     s = State()
-    assert rank.due_slot(local(7), s) is None  # before first slot
+    assert rank.due_slot(local(7), s) is None  # quiet until 08:00
     assert rank.due_slot(local(8), s) == 8
     assert rank.due_slot(local(9), s) == 8  # run came late, slot still due
     assert rank.due_slot(local(11), s) == 10  # a missed slot is skipped, not double-posted
     assert rank.due_slot(local(22), s) == 22
-    assert rank.due_slot(local(23), s) is None  # quiet hours
+    assert rank.due_slot(local(23), s) == 22  # 22:00 still allowed to catch up before midnight
+    assert rank.due_slot(local(0, 0), s) == 0  # midnight post
+    assert rank.due_slot(local(0, 30), s) is None  # quiet from 00:20
     assert rank.due_slot(local(3), s) is None
 
 
@@ -113,7 +115,7 @@ def test_breaking_requires_lebanon_fresh_important(now):
 def test_breaking_daily_cap_and_quiet_hours(now):
     s = State()
     good = make_candidate(1, importance=9, lebanon=3, breaking=True)
-    night = now.replace(hour=22)  # 00:07 Beirut
+    night = now.replace(hour=23)  # 01:07 Beirut, quiet
     assert rank.select_breaking([good], s, night) is None
     for i in range(config.MAX_BREAKING_PER_DAY):
         s.record_post({"id": f"b{i}", "title": f"b{i}", "english_title": f"breaking {i}", "url": "u",

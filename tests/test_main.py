@@ -50,6 +50,8 @@ class FakeEditor:
 
     def write_post(self, a, text):
         self.written += 1
+        if "Thin" in a.title:
+            return None, "not enough information"
         return PostContent("عنوان عربي", "ملخص عربي قصير.", a.title, "Short English summary.", ["Test"]), ""
 
 
@@ -183,6 +185,23 @@ def test_duplicate_check_failure_falls_back_to_title_matching(settings):
     sender = FakeSender()
     code = main.run(settings, now=NOW, editor_factory=Broken, sender=sender, fetch=fetch)
     assert code == 0 and len(sender.sent) == 2  # breaking + slot story still go out
+
+
+def test_slot_tries_next_story_when_first_cannot_be_written(settings):
+    def fetch_thin(feeds, now):
+        return [article(30, "Thin story with an unreachable page", hours_old=0.1),
+                article(31, "Solid cyber story with full text", hours_old=2)], {}
+
+    class Picky(FakeEditor):
+        def screen_batch(self, batch, known_titles=None):
+            out = super().screen_batch(batch, known_titles)
+            for i, a in enumerate(batch):
+                out[i].importance = 9 if "Thin" in a.title else 7  # the thin story ranks first
+            return out
+
+    sender = FakeSender()
+    main.run(settings, now=NOW, editor_factory=Picky, sender=sender, fetch=fetch_thin)
+    assert len(sender.sent) == 1 and "Solid cyber story" in sender.sent[0]  # slot not left empty
 
 
 def test_no_posts_during_quiet_hours(settings):

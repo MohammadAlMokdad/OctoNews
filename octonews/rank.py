@@ -57,7 +57,7 @@ def known_titles(state: State, now: datetime, limit: int = 120) -> list[str]:
 
 
 def in_quiet_hours(local_now: datetime) -> bool:
-    return local_now.hour >= config.QUIET_START_HOUR or local_now.hour < config.QUIET_END_HOUR
+    return config.QUIET_START <= local_now.time() < config.QUIET_END
 
 
 def due_slot(local_now: datetime, state: State) -> int | None:

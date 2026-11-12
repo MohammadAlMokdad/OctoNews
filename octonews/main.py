@@ -179,7 +179,6 @@ def run(
         _screen_new_articles(articles, state, get_editor, now)
 
         candidates = [Candidate.from_dict(d) for d in state.candidates.values()]
-        plan: list[tuple[Candidate, str]] = []
 
         paused = settings.paused_until is not None and now < settings.paused_until and not force_slot
         if paused:
@@ -197,41 +196,52 @@ def run(
             candidates = _drop_repeats(candidates, state, now, get_editor)
 
         breaking = None if paused else rank.select_breaking(candidates, state, now)
-        if breaking:
-            plan.append((breaking, "breaking"))
         incomplete = False
         state_slot_key = slot_key_for(local_now.date(), slot) if slot is not None else ""
-        if slot is not None:
-            picks = rank.select_for_slot([c for c in candidates if c is not breaking], state, now, slot)
-            log.info("Slot %02d:00 due: %d stories selected from %d candidates", slot, len(picks), len(candidates))
-            plan += [(c, "slot") for c in picks]
-        else:
+        if slot is None:
             log.info("No slot due")
 
-        if plan:
+        if breaking or slot is not None:
             if not dry_run and sender is None:
                 from .whatsapp import make_sender
 
                 if not settings.channel_id:
                     raise RuntimeError("WHATSAPP_CHANNEL_ID is not set")
                 sender = make_sender(settings)
-            for n, (c, kind) in enumerate(plan):
-                if n and not dry_run:
+            sent = 0
+
+            def publish(c: Candidate, kind: str, slot_key: str = "") -> bool:
+                nonlocal sent
+                if sent and not dry_run:
                     time.sleep(SECONDS_BETWEEN_POSTS)
-                slot_key = state_slot_key if kind == "slot" else ""
-                try:
-                    _write_and_post(c, kind, get_editor(), sender, settings, state, now, dry_run, slot_key)
-                except AIUnavailable as exc:
-                    log.warning("AI unavailable, the rest of this slot will be retried next run: %s", exc)
-                    incomplete = True
-                    break
-                except Exception as exc:
-                    log.error("Failed to publish %r: %s", c.title, exc)
-                    exit_code = 1  # WhatsApp/gateway problem: fail the run so GitHub emails an alert
-                    incomplete = True
-                    break
-                if not dry_run:
-                    state.save(settings.state_file)  # save after every post: never double-post
+                ok = _write_and_post(c, kind, get_editor(), sender, settings, state, now, dry_run, slot_key)
+                if ok:
+                    sent += 1
+                    if not dry_run:
+                        state.save(settings.state_file)  # save after every post: never double-post
+                return ok
+
+            try:
+                if breaking:
+                    publish(breaking, "breaking")
+                if slot is not None:
+                    # A picked story can still fail (page unreachable, too little to write about):
+                    # then try the next best one instead of leaving the slot empty.
+                    pool = [c for c in candidates if c is not breaking]
+                    for _ in range(config.MAX_PICK_ATTEMPTS):
+                        picks = rank.select_for_slot(pool, state, now, slot)
+                        if not picks:
+                            break
+                        log.info("Slot %02d:00: trying %r", slot, picks[0].english_title or picks[0].title)
+                        publish(picks[0], "slot", state_slot_key)
+                        pool.remove(picks[0])
+            except AIUnavailable as exc:
+                log.warning("AI unavailable, the rest of this slot will be retried next run: %s", exc)
+                incomplete = True
+            except Exception as exc:
+                log.error("Failed to publish: %s", exc)
+                exit_code = 1  # WhatsApp/gateway problem: the next run retries
+                incomplete = True
 
         if slot is not None and not force_slot and not incomplete:
             state.mark_slot_done(local_now.date(), slot)  # if incomplete, the next hourly run continues it

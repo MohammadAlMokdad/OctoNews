@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from datetime import datetime
+from datetime import time as dt_time
 from pathlib import Path
 from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
@@ -18,14 +19,17 @@ DEFAULT_STATE_FILE = ROOT / "data" / "state.json"
 
 TZ = ZoneInfo("Asia/Beirut")
 
-# Posting schedule (Beirut local hours): one story every 2 hours, 08:00-22:00.
-SLOT_HOURS = (8, 10, 12, 14, 16, 18, 20, 22)
+# Posting schedule (Beirut local hours): one story every 2 hours from 08:00 to midnight (00:00).
+SLOT_HOURS = (0, 8, 10, 12, 14, 16, 18, 20, 22)
 MAX_POSTS_PER_SLOT = 1
 MAX_SLOT_POSTS_PER_DAY = len(SLOT_HOURS)
+MAX_PICK_ATTEMPTS = 4  # if a picked story can't be written (page unreachable etc.), try the next best
 LEBANON_GUARANTEE_FROM_HOUR = 18  # from this slot on, post a Lebanon story if none went out today
 MAX_BREAKING_PER_DAY = 2
-QUIET_START_HOUR = 23  # no posting from 23:00 ...
-QUIET_END_HOUR = 7  # ... until 07:00
+# Quiet period: no posting starts between 00:20 and 08:00. The midnight post goes out at 00:00; if it
+# can't go out by 00:20 it is dropped rather than posted in the night.
+QUIET_START = dt_time(0, 20)
+QUIET_END = dt_time(8, 0)
 
 # Freshness / housekeeping.
 MAX_ARTICLE_AGE_HOURS = 24
